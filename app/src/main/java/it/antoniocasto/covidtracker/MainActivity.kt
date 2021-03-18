@@ -47,7 +47,6 @@ class MainActivity : AppCompatActivity() {
                 }
                 //Put old data first using reversed ordering
                 nationalDailyData = nationalData.reversed()
-
                 Log.i(TAG, "Update graph with national data")
                 //TODO: Update graph with national data
 

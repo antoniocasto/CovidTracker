@@ -52,19 +52,19 @@
     <com.robinhood.spark.SparkView
         android:id="@+id/sparkView"
         android:layout_width="match_parent"
-        android:layout_height="150dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toTopOf="@+id/radioGroupTimeSelection"
         app:layout_constraintTop_toBottomOf="@+id/radioGroupMetricSelection" />
 
     <RadioGroup
         android:id="@+id/radioGroupTimeSelection"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
         android:gravity="center"
         android:orientation="horizontal"
+        app:layout_constraintBottom_toTopOf="@+id/tvMetricLabel"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/sparkView">
+        app:layout_constraintStart_toStartOf="parent">
 
         <RadioButton
             android:id="@+id/radioButtonWeek"
@@ -92,7 +92,7 @@
         android:layout_marginStart="16dp"
         android:layout_marginLeft="16dp"
         android:gravity="center"
-        android:text="TextView"
+        android:text="May 30, 2020"
         android:textAppearance="@style/TextAppearance.AppCompat.Body1"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
@@ -102,9 +102,10 @@
         android:layout_width="0dp"
         android:layout_height="80dp"
         android:gravity="center"
-        android:text="TextView"
+        android:textAppearance="@style/TextAppearance.AppCompat.Display1"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/tvDateLabel" />
+        app:layout_constraintStart_toEndOf="@+id/tvDateLabel"
+        tools:text="4,354" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

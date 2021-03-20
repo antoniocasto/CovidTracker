@@ -6,6 +6,8 @@ import android.util.Log
 import android.widget.RadioButton
 import android.widget.RadioGroup
 import android.widget.TextView
+import androidx.annotation.ColorInt
+import androidx.core.content.ContextCompat
 import com.google.gson.GsonBuilder
 import com.robinhood.spark.SparkView
 import retrofit2.Call
@@ -19,6 +21,8 @@ import java.util.*
 
 private const val BASE_URL = "https://covidtracking.com/api/v1/"
 private const val TAG = "MainActivity"
+private const val ALL_STATES = "All (nationwide)"
+
 
 class MainActivity : AppCompatActivity() {
 
@@ -29,10 +33,12 @@ class MainActivity : AppCompatActivity() {
     private lateinit var radioButtonMax: RadioButton
     private lateinit var radioGroupTimeSelection: RadioGroup
     private lateinit var radioGroupMetricSelection: RadioGroup
+    private lateinit var sparkView: SparkView
+
 
     private lateinit var perStateDailyData: Map<String, List<CovidData>>
     private lateinit var nationalDailyData: List<CovidData>
-    private lateinit var sparkView: SparkView
+    private lateinit var currentlyShownData: List<CovidData>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -101,7 +107,9 @@ class MainActivity : AppCompatActivity() {
                 perStateDailyData = statesData.reversed().groupBy { it.state }
 
                 Log.i(TAG, "Update spinner with state names")
-                //TODO: Update spinner with state names
+                //Update spinner with state names
+
+                updateSpinnerWithStateData(perStateDailyData.keys)
 
             }
 
@@ -111,6 +119,14 @@ class MainActivity : AppCompatActivity() {
 
         })
 
+    }
+
+    private fun updateSpinnerWithStateData(stateNames: Set<String>) {
+        val stateAbbreviationList = stateNames.toMutableList()
+        stateAbbreviationList.sort()
+        stateAbbreviationList.add(0, ALL_STATES)
+
+        // Add state list as data source fot the spinner
     }
 
     private fun setupEventListeners() {
@@ -150,11 +166,27 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun updateDisplayMetric(metric: Metric) {
+        // Update the color of the chart
+        val colorRes = when (metric) {
+            Metric.NEGATIVE -> R.color.colorNegative
+            Metric.POSITIVE -> R.color.colorPositive
+            Metric.DEATH -> R.color.colorDeath
+        }
+        @ColorInt val colorInt = ContextCompat.getColor(this, colorRes)
+        sparkView.lineColor = colorInt
+        tvMetricLabel.setTextColor(colorInt)
+
+        // Update the metric on the adapter
         adapter.metric = metric
         adapter.notifyDataSetChanged()
+
+        // Reset number and date shown in the bottom text views
+        updateInfoForDate(currentlyShownData.last())
     }
 
     private fun updateDisplayWithData(dailyData: List<CovidData>) {
+        currentlyShownData = dailyData
+
         // Create a new SparkAdapter with the data
         adapter = CovidSparkAdapter(dailyData)
         sparkView.adapter = adapter
@@ -164,7 +196,7 @@ class MainActivity : AppCompatActivity() {
         radioButtonMax.isChecked = true
 
         // Display metric for the most recent date in the bottom part of the UI
-        updateInfoForDate(dailyData.last()) //Chronological order
+        updateDisplayMetric(Metric.POSITIVE) //Chronological order
 
     }
 

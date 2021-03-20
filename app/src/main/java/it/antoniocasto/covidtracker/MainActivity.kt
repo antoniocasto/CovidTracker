@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.widget.RadioButton
+import android.widget.RadioGroup
 import android.widget.TextView
 import com.google.gson.GsonBuilder
 import com.robinhood.spark.SparkView
@@ -21,10 +22,13 @@ private const val TAG = "MainActivity"
 
 class MainActivity : AppCompatActivity() {
 
+    private lateinit var adapter: CovidSparkAdapter
     private lateinit var tvMetricLabel: TextView
     private lateinit var tvDateLabel: TextView
     private lateinit var radioButtonPositive: RadioButton
     private lateinit var radioButtonMax: RadioButton
+    private lateinit var radioGroupTimeSelection: RadioGroup
+    private lateinit var radioGroupMetricSelection: RadioGroup
 
     private lateinit var perStateDailyData: Map<String, List<CovidData>>
     private lateinit var nationalDailyData: List<CovidData>
@@ -40,6 +44,8 @@ class MainActivity : AppCompatActivity() {
         radioButtonPositive = findViewById(R.id.radioButtonPositive)
         radioButtonMax = findViewById(R.id.radioButtonMax)
         sparkView = findViewById(R.id.sparkView)
+        radioGroupTimeSelection = findViewById(R.id.radioGroupTimeSelection)
+        radioGroupMetricSelection = findViewById(R.id.radioGroupMetricSelection)
 
         //Prepare retrofit to obtain structured data
         val gson = GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss").create()
@@ -61,6 +67,10 @@ class MainActivity : AppCompatActivity() {
                     Log.w(TAG, "Did not receive a valid response body")
                     return
                 }
+
+                // Put here because we want the UI being reactive when we have data to show
+                setupEventListeners()
+
                 //Put old data first using reversed ordering
                 nationalDailyData = nationalData.reversed()
                 Log.i(TAG, "Update graph with national data")
@@ -103,23 +113,70 @@ class MainActivity : AppCompatActivity() {
 
     }
 
+    private fun setupEventListeners() {
+
+        // Add a listener for the user scrubbing on the chart
+        sparkView.isScrubEnabled = true
+        sparkView.setScrubListener { itemData ->
+
+            if (itemData is CovidData) { //Safety check. If it's something else the UI is not responding
+                updateInfoForDate(itemData)
+            }
+
+        }
+
+        // Respond to radio button selected events
+        radioGroupTimeSelection.setOnCheckedChangeListener { _, checkedId ->
+            when (checkedId) {
+                R.id.radioButton3Month -> updateDisplayTimeScale(TimeScale.THREEMONTH)
+                R.id.radioButtonMonth -> updateDisplayTimeScale(TimeScale.MONTH)
+                R.id.radioButtonMax -> updateDisplayTimeScale(TimeScale.MAX)
+            }
+        }
+
+        radioGroupMetricSelection.setOnCheckedChangeListener { _, checkedId ->
+            // Different just for exercise
+            when (checkedId) {
+                R.id.radioButtonDeath -> updateDisplayMetric(Metric.DEATH)
+                R.id.radioButtonNegative -> updateDisplayMetric(Metric.NEGATIVE)
+                R.id.radioButtonPositive -> updateDisplayMetric(Metric.POSITIVE)
+            }
+        }
+    }
+
+    private fun updateDisplayTimeScale(timeScale: TimeScale) {
+        adapter.daysAgo = timeScale
+        adapter.notifyDataSetChanged()
+    }
+
+    private fun updateDisplayMetric(metric: Metric) {
+        adapter.metric = metric
+        adapter.notifyDataSetChanged()
+    }
+
     private fun updateDisplayWithData(dailyData: List<CovidData>) {
         // Create a new SparkAdapter with the data
-        val adapter = CovidSparkAdapter(dailyData)
+        adapter = CovidSparkAdapter(dailyData)
         sparkView.adapter = adapter
 
         // Update radio buttons to select the positive cases and max time by default
         radioButtonPositive.isChecked = true
         radioButtonMax.isChecked = true
 
-        // Display metric for the most recent date
+        // Display metric for the most recent date in the bottom part of the UI
         updateInfoForDate(dailyData.last()) //Chronological order
 
     }
 
     private fun updateInfoForDate(covidData: CovidData) {
 
-        tvMetricLabel.text = NumberFormat.getInstance().format(covidData.positiveIncrease)
+        val numCases = when (adapter.metric) {
+            Metric.NEGATIVE -> covidData.negativeIncrease
+            Metric.POSITIVE -> covidData.positiveIncrease
+            Metric.DEATH -> covidData.deathIncrease
+        }
+
+        tvMetricLabel.text = NumberFormat.getInstance().format(numCases)
         val outputDateFormat = SimpleDateFormat("MMM dd, yyyy", Locale.US)
         tvDateLabel.text = outputDateFormat.format(covidData.dateChecked)
 

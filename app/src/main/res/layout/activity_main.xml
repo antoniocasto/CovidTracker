@@ -51,9 +51,11 @@
 
     <com.robinhood.spark.SparkView
         android:id="@+id/sparkView"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="0dp"
         app:layout_constraintBottom_toTopOf="@+id/radioGroupTimeSelection"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/radioGroupMetricSelection" />
 
     <RadioGroup
@@ -67,16 +69,16 @@
         app:layout_constraintStart_toStartOf="parent">
 
         <RadioButton
-            android:id="@+id/radioButtonWeek"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Week" />
-
-        <RadioButton
             android:id="@+id/radioButtonMonth"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Month" />
+
+        <RadioButton
+            android:id="@+id/radioButton3Month"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="3 Months" />
 
         <RadioButton
             android:id="@+id/radioButtonMax"

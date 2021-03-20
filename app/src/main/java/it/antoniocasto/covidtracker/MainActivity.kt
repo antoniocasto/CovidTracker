@@ -32,10 +32,7 @@ class MainActivity : AppCompatActivity() {
 
         //Fetch national data
         covidService.getNationalData().enqueue(object : Callback<List<CovidData>> {
-            override fun onResponse(
-                call: Call<List<CovidData>>,
-                response: Response<List<CovidData>>
-            ) {
+            override fun onResponse(call: Call<List<CovidData>>, response: Response<List<CovidData>>) {
 
                 Log.i(TAG, "onResponse $response")
 
@@ -60,10 +57,7 @@ class MainActivity : AppCompatActivity() {
 
         //Fetch the state data
         covidService.getStatesData().enqueue(object : Callback<List<CovidData>> {
-            override fun onResponse(
-                call: Call<List<CovidData>>,
-                response: Response<List<CovidData>>
-            ) {
+            override fun onResponse(call: Call<List<CovidData>>, response: Response<List<CovidData>>) {
 
                 Log.i(TAG, "onResponse $response")
 

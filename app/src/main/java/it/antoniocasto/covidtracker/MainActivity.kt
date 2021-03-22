@@ -10,6 +10,7 @@ import androidx.annotation.ColorInt
 import androidx.core.content.ContextCompat
 import com.google.gson.GsonBuilder
 import com.robinhood.spark.SparkView
+import org.angmarch.views.NiceSpinner
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -26,7 +27,7 @@ private const val ALL_STATES = "All (nationwide)"
 
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var adapter: CovidSparkAdapter
+    //Components
     private lateinit var tvMetricLabel: TextView
     private lateinit var tvDateLabel: TextView
     private lateinit var radioButtonPositive: RadioButton
@@ -34,6 +35,10 @@ class MainActivity : AppCompatActivity() {
     private lateinit var radioGroupTimeSelection: RadioGroup
     private lateinit var radioGroupMetricSelection: RadioGroup
     private lateinit var sparkView: SparkView
+    private lateinit var spinnerSelect: NiceSpinner
+
+    //Adapters
+    private lateinit var adapter: CovidSparkAdapter
 
 
     private lateinit var perStateDailyData: Map<String, List<CovidData>>
@@ -127,6 +132,13 @@ class MainActivity : AppCompatActivity() {
         stateAbbreviationList.add(0, ALL_STATES)
 
         // Add state list as data source fot the spinner
+        spinnerSelect.attachDataSource(stateAbbreviationList)
+        spinnerSelect.setOnSpinnerItemSelectedListener { parent, _, position, _ ->
+
+            val selectedState = parent.getItemAtPosition(position) as String
+            val selectedData = perStateDailyData[selectedState] ?: nationalDailyData
+            updateDisplayWithData(selectedData)
+        }
     }
 
     private fun setupEventListeners() {
